@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pistol : Weapon
+public class Shotgun : Weapon
 {
+
     bool fire = true;
     float time = 0;
+
     private void Update()
     {
         time += Time.deltaTime;
@@ -21,10 +23,10 @@ public class Pistol : Weapon
         {
             fire = false;
             time = 0;
+
             Vector3 aimDir = player.GetAimDirectionNormalized();
             ShooterGameMultiplayer.Instance.SpawnBullet(player,bulletPrefab, player.GetAimAngle().z, aimDir.x, aimDir.y, firePoint);
 
         }
     }
-  
 }

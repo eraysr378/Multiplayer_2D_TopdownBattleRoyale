@@ -1,33 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class Rifle : Weapon
 {
+    private const string IS_MUZZLE_FIRING = "IsMuzzleFiring";
+
+
+
     bool fire = true;
     float time = 0;
-    override public void Fire()
-    {
-      
-        if(fire)
-        {
-            GameObject projectileBullet = Instantiate(bulletPrefab, player.transform.position,Quaternion.identity);
-            projectileBullet.transform.Rotate(player.transform.eulerAngles);
-            projectileBullet.GetComponent<Rigidbody2D>().AddForce(projectileBullet.transform.up * bulletSpeed, ForceMode2D.Impulse);
-            Debug.Log(player.transform.eulerAngles);
-            Debug.Log(projectileBullet.transform.eulerAngles);
-            fire = false;
-        }
-
-
-    }
+   
     private void Update()
     {
         time += Time.deltaTime;
-        if (time > 1)
+        if (time > 0.1f)
         {
             fire = true;
             time = 0;
         }
     }
+    override public void Fire()
+    {
+        if (fire)
+        {
+            fire = false;
+            time = 0;
+
+            Vector3 aimDir = player.GetAimDirectionNormalized();
+            ShooterGameMultiplayer.Instance.SpawnBullet(player,bulletPrefab, player.GetAimAngle().z, aimDir.x, aimDir.y, firePoint);
+
+            animator.SetTrigger(IS_MUZZLE_FIRING);
+        }
+    }
+
 }
