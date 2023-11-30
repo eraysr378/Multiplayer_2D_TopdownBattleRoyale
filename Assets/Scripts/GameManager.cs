@@ -60,16 +60,20 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void RespawnDeadPlayerServerRpc(NetworkObjectReference playerNetworkObjectReference)
     {
+        playerNetworkObjectReference.TryGet(out NetworkObject playerNetworkObject);
+        Player player = playerNetworkObject.GetComponent<Player>();
+        player.GetHealthSystem().AddHealth(1000);
+
         RespawnDeadPlayerClientRpc(playerNetworkObjectReference);
+
     }
     [ClientRpc]
     private void RespawnDeadPlayerClientRpc(NetworkObjectReference playerNetworkObjectReference)
     {
         playerNetworkObjectReference.TryGet(out NetworkObject playerNetworkObject);
         Player player = playerNetworkObject.GetComponent<Player>();
-        player.transform.position = Player.LocalInstance.GetSpawnPosition();
-        player.GetHealthSystem().AddHealth(1000);
         player.gameObject.SetActive(true);
+        player.transform.position = Player.LocalInstance.GetSpawnPosition();
 
     }
 

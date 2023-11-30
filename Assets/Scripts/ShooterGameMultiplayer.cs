@@ -51,8 +51,24 @@ public class ShooterGameMultiplayer : NetworkBehaviour
     public void DestroyBulletServerRpc(NetworkObjectReference bulletNetworkObjectReference)
     {
         bulletNetworkObjectReference.TryGet(out NetworkObject bulletNetworkObject);
-        Bullet bullet = bulletNetworkObject.GetComponent<Bullet>();
-        bullet.DestroySelf();
+        if(bulletNetworkObject != null)
+        {
+            Bullet bullet = bulletNetworkObject.GetComponent<Bullet>();
+            if(bullet != null)
+            {
+                bullet.DestroySelf();
+            }
+            else
+            {
+                Debug.Log("Bullet does not exist");
+            }
+        }
+        else
+        {
+            Debug.Log("Bullet network object does not exist");
+
+        }
+
     }
 
 

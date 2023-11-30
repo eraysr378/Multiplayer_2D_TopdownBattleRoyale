@@ -25,12 +25,16 @@ public class Bullet : NetworkBehaviour
     }
     private void Update()
     {
-        if (timer > lifeTime)
+        if (IsServer)
         {
-            Bullet.DestroyBulllet(this);
+            if (timer > lifeTime)
+            {
+                Destroy(gameObject);
+                timer = -100; // to not try to destroy again
+            }
+            timer += Time.deltaTime;
         }
-        timer += Time.deltaTime;
-
+       
 
         float moveDistance = bulletSpeed * Time.deltaTime;
         RaycastHit2D[] hitArray = Physics2D.CircleCastAll(transform.position, bulletRadius, moveDir, moveDistance);
@@ -60,16 +64,6 @@ public class Bullet : NetworkBehaviour
     public static void DestroyBulllet(Bullet bullet)
     {
         ShooterGameMultiplayer.Instance.DestroyBullet(bullet);
-    }
-    [ServerRpc(RequireOwnership = false)]
-    public void DestroySelfServerRpc()
-    {
-        DestroySelfClientRpc();
-    }
-    [ClientRpc]
-    public void DestroySelfClientRpc()
-    {
-        bulletNetworkObject.gameObject.SetActive(false);
     }
     public void FireBullet(Vector2 bulletDirectionNormalized, float bulletAngle)
     {

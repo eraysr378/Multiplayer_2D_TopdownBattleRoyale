@@ -34,8 +34,7 @@ public class Player : NetworkBehaviour
 
     private void Awake()
     {
-        playerHealthSystem = GetComponentInChildren<PlayerHealthSystem>();
-        playerHealthSystem.OnPlayerDied += PlayerHealthSystem_OnPlayerDied;
+       
 
 
     }
@@ -58,7 +57,7 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.B))
         {
             GetComponent<PlayerHealthSystem>().TakeDamageServerRpc(10);
-            Debug.Log("player get hit, health: " + playerHealthSystem.GetCurrentHealth());
+            Debug.Log("player get hit, health: " + playerHealthSystem.GetCurrentHealth().Value);
         }
     }
     public override void OnNetworkSpawn()
@@ -68,6 +67,9 @@ public class Player : NetworkBehaviour
             LocalInstance = this;
         }
         OnAnyPlayerSpawned?.Invoke(this, EventArgs.Empty);
+
+        playerHealthSystem = GetComponentInChildren<PlayerHealthSystem>();
+        playerHealthSystem.OnPlayerDied += PlayerHealthSystem_OnPlayerDied;
 
         transform.position = spawnPositionsList[(int)OwnerClientId]; // this will change when lobby is added
 

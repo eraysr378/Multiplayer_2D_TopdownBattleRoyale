@@ -16,6 +16,7 @@ public class FloatingHealthBar : MonoBehaviour
     private Gradient gradient;
     private void Awake()
     {
+        SetGradient();
         healthSystem = GetComponentInParent<PlayerHealthSystem>();
         healthBarSlider = GetComponent<Slider>();
 
@@ -25,7 +26,6 @@ public class FloatingHealthBar : MonoBehaviour
 
     private void Start()
     {
-        SetGradient();
     }
     private void OnEnable()
     {
