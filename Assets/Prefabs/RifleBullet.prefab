@@ -93,10 +93,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3787291546468128342}
-  - component: {fileID: -4875639537332417497}
   - component: {fileID: 3960024442549102156}
   - component: {fileID: 1580120826253482338}
   - component: {fileID: 6887936235751988570}
+  - component: {fileID: -4875639537332417497}
   m_Layer: 0
   m_Name: RifleBullet
   m_TagString: Untagged
@@ -120,33 +120,6 @@ Transform:
   - {fileID: 2759631813984721656}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &-4875639537332417497
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7783503044350860587}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!114 &3960024442549102156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,8 +149,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletRadius: 0.15
-  bulletSpeed: 20
-  bulletDamage: 10
+  bulletSpeed: 50
+  bulletDamage: 15
   lifeTime: 1
 --- !u!61 &6887936235751988570
 BoxCollider2D:
@@ -224,3 +197,30 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.829653, y: 0.303126}
   m_EdgeRadius: 0
+--- !u!50 &-4875639537332417497
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7783503044350860587}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

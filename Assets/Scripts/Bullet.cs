@@ -14,14 +14,12 @@ public class Bullet : NetworkBehaviour
     [SerializeField] private float lifeTime;
 
     private Player owner;
-    private Rigidbody2D rb;
     private Vector3 moveDir;
     private NetworkObject bulletNetworkObject;
     private float timer;
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
     }
     private void Update()
     {
@@ -34,8 +32,8 @@ public class Bullet : NetworkBehaviour
             }
             timer += Time.deltaTime;
         }
-       
 
+        moveDir = transform.right;
         float moveDistance = bulletSpeed * Time.deltaTime;
         RaycastHit2D[] hitArray = Physics2D.CircleCastAll(transform.position, bulletRadius, moveDir, moveDistance);
         foreach (RaycastHit2D hit in hitArray)
@@ -65,22 +63,20 @@ public class Bullet : NetworkBehaviour
     {
         ShooterGameMultiplayer.Instance.DestroyBullet(bullet);
     }
-    public void FireBullet(Vector2 bulletDirectionNormalized, float bulletAngle)
+    public void FireBullet( float bulletRotationAngle)
     {
-        FireBulletServerRpc(NetworkObject, bulletDirectionNormalized.x, bulletDirectionNormalized.y, bulletAngle);
+        FireBulletServerRpc(NetworkObject, bulletRotationAngle);
     }
     [ServerRpc(RequireOwnership = false)]
-    public void FireBulletServerRpc(NetworkObjectReference bulletNetworkObjectReference, float bulletDirX, float bulletDirY, float bulletAngle)
+    public void FireBulletServerRpc(NetworkObjectReference bulletNetworkObjectReference, float bulletRotationAngle)
     {
-        FireBulletClientRpc(bulletNetworkObjectReference, bulletDirX, bulletDirY, bulletAngle);
+        FireBulletClientRpc(bulletNetworkObjectReference, bulletRotationAngle);
     }
     [ClientRpc]
-    public void FireBulletClientRpc(NetworkObjectReference bulletNetworkObjectReference, float bulletDirX, float bulletDirY, float bulletAngle)
+    public void FireBulletClientRpc(NetworkObjectReference bulletNetworkObjectReference, float bulletRotationAngle)
     {
         bulletNetworkObjectReference.TryGet(out bulletNetworkObject);
-        moveDir = new Vector3(bulletDirX, bulletDirY, 0);
-        bulletNetworkObject.transform.eulerAngles = new Vector3(0, 0, bulletAngle);
-
+        bulletNetworkObject.transform.eulerAngles = new Vector3(0, 0, bulletRotationAngle);
     }
     public NetworkObject GetNetworkObject()
     {

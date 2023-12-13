@@ -7,9 +7,15 @@ using System;
 public class Player : NetworkBehaviour
 {
     public static event EventHandler OnAnyPlayerSpawned;
+    public static event EventHandler OnAnyRifleFired;
+    public static event EventHandler OnAnyShotgunFired;
+    public static event EventHandler OnAnyPistolFired;
     public static void ResetStaticData()
     {
         OnAnyPlayerSpawned = null;
+        OnAnyPistolFired = null;
+        OnAnyRifleFired = null;
+        OnAnyShotgunFired = null;
     }
     public static Player LocalInstance { get; private set; }
 
@@ -21,20 +27,20 @@ public class Player : NetworkBehaviour
 
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private List<Vector3> spawnPositionsList;
+    [SerializeField] private float killScore;
 
-
+    private WeaponController weaponController;
     private PlayerHealthSystem playerHealthSystem;
     private bool isWalking;
 
 
 
 
-    private float timer = 0;
 
 
     private void Awake()
     {
-       
+
 
 
     }
@@ -54,6 +60,7 @@ public class Player : NetworkBehaviour
             return;
         }
         HandleMovement();
+        HandleShooting();
         if (Input.GetKeyDown(KeyCode.B))
         {
             GetComponent<PlayerHealthSystem>().TakeDamageServerRpc(10);
@@ -69,6 +76,7 @@ public class Player : NetworkBehaviour
         OnAnyPlayerSpawned?.Invoke(this, EventArgs.Empty);
 
         playerHealthSystem = GetComponentInChildren<PlayerHealthSystem>();
+        weaponController = GetComponentInChildren<WeaponController>();
         playerHealthSystem.OnPlayerDied += PlayerHealthSystem_OnPlayerDied;
 
         transform.position = spawnPositionsList[(int)OwnerClientId]; // this will change when lobby is added
@@ -86,7 +94,60 @@ public class Player : NetworkBehaviour
 
 
     }
+    private void HandleShooting()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            if (weaponController.Fire())
+            {
+                if (GetCurrentWeapon() is Pistol)
+                {
+                    AnyPistolFiredServerRpc();
+                }
+                else if (GetCurrentWeapon() is Rifle)
+                {
+                    AnyRifleFiredServerRpc();
+                }
+                else if (GetCurrentWeapon() is Shotgun)
+                {
+                    AnyShotgunFiredServerRpc();
+                }
+            }
+        }
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void AnyShotgunFiredServerRpc()
+    {
+        AnyShotgunFiredClientRpc();
 
+    }
+    [ClientRpc]
+    private void AnyShotgunFiredClientRpc()
+    {
+        OnAnyShotgunFired?.Invoke(this, EventArgs.Empty);
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void AnyRifleFiredServerRpc()
+    {
+        AnyRifleFiredClientRpc();
+
+    }
+    [ClientRpc]
+    private void AnyRifleFiredClientRpc()
+    {
+        OnAnyRifleFired?.Invoke(this, EventArgs.Empty);
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void AnyPistolFiredServerRpc()
+    {
+        AnyPistolFiredClientRpc();
+
+    }
+    [ClientRpc]
+    private void AnyPistolFiredClientRpc()
+    {
+        OnAnyPistolFired?.Invoke(this, EventArgs.Empty);
+    }
     private void HandleMovement()
     {
 
@@ -107,7 +168,7 @@ public class Player : NetworkBehaviour
         {
             inputVector.x -= 1;
         }
-       
+
         inputVector = inputVector.normalized;
         Vector3 moveDir = new Vector3(inputVector.x, inputVector.y, 0);
 
@@ -118,10 +179,10 @@ public class Player : NetworkBehaviour
         //bool canMove = !Physics2D.CircleCast(transform.position, playerRadius, moveDir, moveDistance);
         //if (canMove)
         //{
-            transform.position += moveDir * moveDistance;
+        transform.position += moveDir * moveDistance;
         //}
 
-        
+
         transform.eulerAngles = GetAimAngle();
     }
     public bool IsWalking()
@@ -155,8 +216,20 @@ public class Player : NetworkBehaviour
     {
         return spawnPositionsList[(int)OwnerClientId];
     }
+    public float GetKillScore()
+    {
+        return killScore;
+    }
+    public Weapon GetCurrentWeapon()
+    {
+        return weaponController.GetCurrentWeapon();
+    }
+    public WeaponController GetWeaponController()
+    {
+        return weaponController;
+    }
+  
 
-    
 }
 
 

@@ -5,5 +5,6 @@ using UnityEngine;
 
 public class BulletPrefabsSO : ScriptableObject
 {
-   public List<GameObject> bulletPrefabList;
+    public List<GameObject> bulletPrefabList;
+    public List<GameObject> bulletShellPrefabList;
 }

@@ -14,25 +14,39 @@ public class Rifle : Weapon
    
     private void Update()
     {
-        time += Time.deltaTime;
-        if (time > 0.1f)
+        if (!fire)
         {
-            fire = true;
-            time = 0;
+            time += Time.deltaTime;
+            if (time > timeBetweenShots)
+            {
+                fire = true;
+                time = 0;
+            }
         }
+       
     }
-    override public void Fire()
+    override public bool Fire()
     {
         if (fire)
         {
             fire = false;
             time = 0;
+            float bulletRotationAngle = player.GetAimAngle().z;
+            // if player is walking, then accuracy will be decreased
+            if (player.IsWalking())
+            {
+                ShooterGameMultiplayer.Instance.SpawnBullet(player, bulletPrefab, bulletRotationAngle + Random.Range(-walkingRecoil,walkingRecoil+1), firePoint);
+            }
+            else
+            {
+                ShooterGameMultiplayer.Instance.SpawnBullet(player, bulletPrefab, bulletRotationAngle, firePoint);
 
-            Vector3 aimDir = player.GetAimDirectionNormalized();
-            ShooterGameMultiplayer.Instance.SpawnBullet(player,bulletPrefab, player.GetAimAngle().z, aimDir.x, aimDir.y, firePoint);
-
+            }
+            ShooterGameMultiplayer.Instance.SpawnBulletShell(bulletShellPrefab,bulletRotationAngle,bulletShellSpawnPoint);
             animator.SetTrigger(IS_MUZZLE_FIRING);
+            return true;
         }
+        return false;
     }
 
 }

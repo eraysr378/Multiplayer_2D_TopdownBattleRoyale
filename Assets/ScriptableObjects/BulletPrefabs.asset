@@ -16,3 +16,7 @@ MonoBehaviour:
   - {fileID: 4764303364729742511, guid: b4402248266c3a14392d7798b22cc59b, type: 3}
   - {fileID: 7783503044350860587, guid: 7d63ada079f8e4542ad5f790b0cac852, type: 3}
   - {fileID: 3587075605937974567, guid: f3a75e1c27571b044bdb112986927d40, type: 3}
+  bulletShellPrefabList:
+  - {fileID: 1514130506925993395, guid: 699180bd0bed0ed46a2cc1881d47b1d8, type: 3}
+  - {fileID: 8917836813116517522, guid: 2ab108248a71e3d41b797a0eb3540bb7, type: 3}
+  - {fileID: 4865558594131995596, guid: 78aa5c7402d6e6c45a0379a801d1b7dd, type: 3}

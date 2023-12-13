@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class Pistol : Weapon
@@ -8,23 +9,38 @@ public class Pistol : Weapon
     float time = 0;
     private void Update()
     {
-        time += Time.deltaTime;
-        if (time > 0.1f)
+        if (!fire)
         {
-            fire = true;
-            time = 0;
+            time += Time.deltaTime;
+            if (time > timeBetweenShots)
+            {
+                fire = true;
+                time = 0;
+            }
         }
     }
-    override public void Fire()
+    override public bool Fire()
     {
         if (fire)
         {
             fire = false;
             time = 0;
-            Vector3 aimDir = player.GetAimDirectionNormalized();
-            ShooterGameMultiplayer.Instance.SpawnBullet(player,bulletPrefab, player.GetAimAngle().z, aimDir.x, aimDir.y, firePoint);
+            float bulletRotationAngle = player.GetAimAngle().z;
+            // if player is walking, then accuracy will be decreased
+            if (player.IsWalking())
+            {
+                ShooterGameMultiplayer.Instance.SpawnBullet(player, bulletPrefab, bulletRotationAngle + Random.Range(-walkingRecoil, walkingRecoil + 1), firePoint);
+            }
+            else
+            {
+                ShooterGameMultiplayer.Instance.SpawnBullet(player, bulletPrefab, bulletRotationAngle, firePoint);
 
+            }
+            ShooterGameMultiplayer.Instance.SpawnBulletShell(bulletShellPrefab, bulletRotationAngle, bulletShellSpawnPoint);
+
+            return true;
         }
+        return false;
     }
-  
+
 }
