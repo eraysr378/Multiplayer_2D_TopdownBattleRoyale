@@ -2,27 +2,62 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 using Cinemachine;
+using System.Collections.Generic;
 
 public class GameManager : NetworkBehaviour
 {
-    private enum State
-    {
-        Start,
-        GameOver
-    }
+
     public static GameManager Instance { get; private set; }
     public event EventHandler OnStateChanged;
-    [SerializeField] private CinemachineVirtualCamera virtualCamera; 
-    private State state;
-    private float roundTimer = 10f;
+    public event EventHandler OnLocalPlayerReadyChanged;
+    private enum State
+    {
+        WaitingToStart,
+        CountdownToStart,
+        GamePlaying,
+        GameOver
+    }
+    [SerializeField] private CinemachineVirtualCamera virtualCamera;
+    [SerializeField] private Transform playerPrefab;
+    private NetworkVariable< State> state = new NetworkVariable<State>(State.WaitingToStart);
+    private bool isLocalPlayerReady;
+    private NetworkVariable<float> countdownToStartTimer = new NetworkVariable<float>(3f);
+    private Dictionary<ulong, bool> playerReadyDictionary; 
     // Start is called before the first frame update
 
     private void Awake()
     {
         Instance = this;
-        state = State.Start;
+        playerReadyDictionary = new Dictionary<ulong, bool>();
 
     }
+    public override void OnNetworkSpawn()
+    {
+        state.OnValueChanged += State_OnValueChanged;
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneManager_OnLoadEventCompleted;
+        }
+    }
+
+    private void SceneManager_OnLoadEventCompleted(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+
+    {
+
+        foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+
+            Transform playerTransform = Instantiate(playerPrefab);
+            playerTransform.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId,true);
+        }
+    }
+
+    private void State_OnValueChanged(State previousValue, State newValue)
+    {
+        OnStateChanged?.Invoke(this, EventArgs.Empty);
+
+    }
+
     void Start()
     {
         if (Player.LocalInstance != null)
@@ -34,39 +69,68 @@ public class GameManager : NetworkBehaviour
         {
             Player.OnAnyPlayerSpawned += Player_OnAnyPlayerSpawned;
         }
-        RoundTimer.Instance.StartTimer(roundTimer);
     }
     private void Update()
     {
-        switch (state)
+        CheckIfPlayerReady();
+        if (!IsServer)
+        {
+            return;
+        }
+        switch (state.Value)
         {
 
-            case State.Start:
-                roundTimer -= Time.deltaTime;
-                if (roundTimer < 0)
+            case State.WaitingToStart:
+                break;
+            case State.CountdownToStart:
+                countdownToStartTimer.Value -= Time.deltaTime;
+                if (countdownToStartTimer.Value < 0)
                 {
-                    state = State.GameOver;
-                    OnStateChanged?.Invoke(this, EventArgs.Empty);
-
+                    state.Value = State.GamePlaying;
                 }
+                break;
+            case State.GamePlaying:
+
                 break;
             case State.GameOver:
                 break;
+
             default:
                 break;
         }
+        Debug.Log(state.Value.ToString());
     }
-    private void x(object sender, System.EventArgs e)
+    [ServerRpc(RequireOwnership =false)]
+    private void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams= default)
     {
-        UnityEngine.Object[] playerList = FindObjectsOfType(typeof(Player));
-        if (playerList.Length == 2)
+        playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
+        bool allClientsReady = true;
+        foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {
-            Player winnerPlayer = (Player)playerList[0];
-            if (playerList[1] != null && ((Player)playerList[1]).GetKillScore() > winnerPlayer.GetKillScore())
+            if(!playerReadyDictionary.ContainsKey(clientId) || !playerReadyDictionary[clientId])
             {
-                winnerPlayer = (Player)playerList[1];
+                // player is not ready
+                allClientsReady = false;
+                break;
             }
         }
+        if(allClientsReady)
+        {
+            state.Value = State.CountdownToStart;
+        }
+    }
+    private void CheckIfPlayerReady()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && state.Value == State.WaitingToStart)
+        {
+            isLocalPlayerReady = true;
+            OnLocalPlayerReadyChanged?.Invoke(this, EventArgs.Empty);
+            SetPlayerReadyServerRpc(); 
+        }
+    }
+    public bool isGamePlaying()
+    {
+        return state.Value == State.GamePlaying;
     }
 
     private void Player_OnAnyPlayerSpawned(object sender, System.EventArgs e)
@@ -124,11 +188,22 @@ public class GameManager : NetworkBehaviour
 
     }
 
-
+    public bool IsLocalPlayerReady()
+    {
+        return isLocalPlayerReady;
+    }
     public bool IsGameOver()
     {
-        return state == State.GameOver;
+        return state.Value == State.GameOver;
+    }
+    public bool IsCountdownToStart()
+    {
+        return state.Value == State.CountdownToStart;
     }
 
+    public float GetCountdownToStartTimer()
+    {
+        return countdownToStartTimer.Value;
+    }
 
 }

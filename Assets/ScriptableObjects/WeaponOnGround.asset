@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a2ce204bb250244f949df1ba90b7410, type: 3}
+  m_Name: WeaponOnGround
+  m_EditorClassIdentifier: 
+  pistol: {fileID: 2380187569240500710, guid: cdfd2056e27441841aef5b3b0f74d649, type: 3}
+  rifle: {fileID: -4460055670935000566, guid: 9146830a90ea30042b73f3e51df2800b, type: 3}
+  shotgun: {fileID: -7500408601666899174, guid: 9fb61c2569495fe428ab206cc0abfa0b, type: 3}

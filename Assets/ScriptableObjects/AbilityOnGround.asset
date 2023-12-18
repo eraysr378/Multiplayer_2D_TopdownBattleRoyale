@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4767f624aa4559543a744da6df1dca93, type: 3}
+  m_Name: AbilityOnGround
+  m_EditorClassIdentifier: 
+  dash: {fileID: 6269752232313952065, guid: 8f6c8a4225abbf348a99665bcea4862c, type: 3}
+  pistolLaser: {fileID: -8079818329922035053, guid: ae3a8e11011a75043b8853064533db23, type: 3}
+  rifleLaser: {fileID: 5413647195485919000, guid: 840e8ee1f6c53c540a4bdd014e7aed59, type: 3}

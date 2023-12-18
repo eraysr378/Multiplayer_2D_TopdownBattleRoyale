@@ -20,7 +20,14 @@ public class FloatingHealthBar : MonoBehaviour
         healthSystem = GetComponentInParent<PlayerHealthSystem>();
         healthBarSlider = GetComponent<Slider>();
 
-
+        healthSystem.GetCurrentHealth().OnValueChanged += (float previousHealth, float newHealth) =>
+        {
+            UpdateHealthBar();
+        };
+        healthSystem.GetMaxHealth().OnValueChanged += (float previousHealth, float newHealth) =>
+        {
+            UpdateHealthBar();
+        };
 
     }
 
@@ -29,11 +36,8 @@ public class FloatingHealthBar : MonoBehaviour
     }
     private void OnEnable()
     {
-        healthSystem.GetCurrentHealth().OnValueChanged += (float previousHealth, float newHealth) =>
-        {
-            UpdateHealthBar(newHealth);
-        };
-        UpdateHealthBar(healthSystem.GetMaxHealth()); // Player connects with full hp
+       
+        UpdateHealthBar(); // Player connects with full hp
     }
     private void Update()
     {
@@ -41,11 +45,17 @@ public class FloatingHealthBar : MonoBehaviour
         transform.position = targetTransform.position + offset;
     }
 
-    public void UpdateHealthBar(float newHealth)
+    public void UpdateHealthBar()
     {
-        float maxHealth = healthSystem.GetMaxHealth();
-        healthBarSlider.value = newHealth / maxHealth;
-        fillImage.color = gradient.Evaluate(newHealth / maxHealth);
+        float maxHealth = healthSystem.GetMaxHealth().Value;
+        if (maxHealth != 0)
+        {
+            float currentHealth = healthSystem.GetCurrentHealth().Value;
+            healthBarSlider.value = currentHealth / maxHealth;
+            fillImage.color = gradient.Evaluate(currentHealth / maxHealth);
+        }
+
+         
     }
 
     private void SetGradient()

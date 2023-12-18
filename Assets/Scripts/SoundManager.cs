@@ -12,6 +12,30 @@ public class SoundManager : MonoBehaviour
         Player.OnAnyPistolFired += Player_OnAnyPistolFired;
         Player.OnAnyRifleFired += Player_OnAnyRifleFired;
         Player.OnAnyShotgunFired += Player_OnAnyShotgunFired;
+        Player.OnAnyPistolReload += Player_OnAnyPistolReload;
+        Player.OnAnyRifleReload += Player_OnAnyRifleReload;
+        Player.OnAnyShotgunReload += Player_OnAnyShotgunReload;
+
+    }
+
+
+
+    private void Player_OnAnyShotgunReload(object sender, System.EventArgs e)
+    {
+        Player player = sender as Player;
+        player.PlayAudioClip(audioClipRefsSO.shotgunReload);
+    }
+
+    private void Player_OnAnyRifleReload(object sender, System.EventArgs e)
+    {
+        Player player = sender as Player;
+        player.PlayAudioClip(audioClipRefsSO.rifleReload);
+    }
+
+    private void Player_OnAnyPistolReload(object sender, System.EventArgs e)
+    {
+        Player player = sender as Player;
+        player.PlayAudioClip(audioClipRefsSO.pistolReload);
     }
 
     private void Player_OnAnyPistolFired(object sender, System.EventArgs e)
