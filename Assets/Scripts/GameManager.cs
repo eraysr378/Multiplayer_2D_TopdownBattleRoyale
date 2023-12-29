@@ -19,16 +19,19 @@ public class GameManager : NetworkBehaviour
     }
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
     [SerializeField] private Transform playerPrefab;
-    private NetworkVariable< State> state = new NetworkVariable<State>(State.WaitingToStart);
+    private NetworkVariable<State> state = new NetworkVariable<State>(State.WaitingToStart);
     private bool isLocalPlayerReady;
     private NetworkVariable<float> countdownToStartTimer = new NetworkVariable<float>(3f);
-    private Dictionary<ulong, bool> playerReadyDictionary; 
+    private Dictionary<ulong, bool> playerReadyDictionary;
+    private Player playerOnCamera;
+    private int alivePlayerCount;
     // Start is called before the first frame update
 
     private void Awake()
     {
         Instance = this;
         playerReadyDictionary = new Dictionary<ulong, bool>();
+        alivePlayerCount = 4;
 
     }
     public override void OnNetworkSpawn()
@@ -48,7 +51,7 @@ public class GameManager : NetworkBehaviour
         {
 
             Transform playerTransform = Instantiate(playerPrefab);
-            playerTransform.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId,true);
+            playerTransform.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
         }
     }
 
@@ -63,6 +66,8 @@ public class GameManager : NetworkBehaviour
         if (Player.LocalInstance != null)
         {
             virtualCamera.Follow = Player.LocalInstance.transform;
+            virtualCamera.LookAt = Player.LocalInstance.transform;
+            playerOnCamera = Player.LocalInstance;
             Player.LocalInstance.OnLocalPlayerDied += Player_OnLocalPlayerDied;
         }
         else
@@ -77,6 +82,10 @@ public class GameManager : NetworkBehaviour
         {
             return;
         }
+        if (alivePlayerCount <= 1)
+        {
+            state.Value = State.GameOver;
+        }
         switch (state.Value)
         {
 
@@ -86,6 +95,7 @@ public class GameManager : NetworkBehaviour
                 countdownToStartTimer.Value -= Time.deltaTime;
                 if (countdownToStartTimer.Value < 0)
                 {
+                    alivePlayerCount = NetworkManager.Singleton.ConnectedClients.Count;
                     state.Value = State.GamePlaying;
                 }
                 break;
@@ -100,21 +110,21 @@ public class GameManager : NetworkBehaviour
         }
         Debug.Log(state.Value.ToString());
     }
-    [ServerRpc(RequireOwnership =false)]
-    private void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams= default)
+    [ServerRpc(RequireOwnership = false)]
+    private void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
     {
         playerReadyDictionary[serverRpcParams.Receive.SenderClientId] = true;
         bool allClientsReady = true;
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
         {
-            if(!playerReadyDictionary.ContainsKey(clientId) || !playerReadyDictionary[clientId])
+            if (!playerReadyDictionary.ContainsKey(clientId) || !playerReadyDictionary[clientId])
             {
                 // player is not ready
                 allClientsReady = false;
                 break;
             }
         }
-        if(allClientsReady)
+        if (allClientsReady)
         {
             state.Value = State.CountdownToStart;
         }
@@ -125,7 +135,7 @@ public class GameManager : NetworkBehaviour
         {
             isLocalPlayerReady = true;
             OnLocalPlayerReadyChanged?.Invoke(this, EventArgs.Empty);
-            SetPlayerReadyServerRpc(); 
+            SetPlayerReadyServerRpc();
         }
     }
     public bool isGamePlaying()
@@ -139,6 +149,7 @@ public class GameManager : NetworkBehaviour
         {
             virtualCamera.Follow = Player.LocalInstance.transform;
             virtualCamera.LookAt = Player.LocalInstance.transform;
+            playerOnCamera = Player.LocalInstance;
 
             Player.LocalInstance.OnLocalPlayerDied -= Player_OnLocalPlayerDied;
             Player.LocalInstance.OnLocalPlayerDied += Player_OnLocalPlayerDied;
@@ -147,14 +158,16 @@ public class GameManager : NetworkBehaviour
 
     private void Player_OnLocalPlayerDied(object sender, Player.OnLocalPlayerDiedEventArgs e)
     {
-        Debug.Log("Player will be spawned after 2 secs");
+        //Debug.Log("Player will be spawned after 2 secs");
         DeactivateDeadPlayerServerRpc(e.player.GetNetworkObject());
-        Invoke("RespawnDeadPlayer", 2f);
+        //Invoke("RespawnDeadPlayer", 2f);
+
 
     }
     [ServerRpc(RequireOwnership = false)]
     private void DeactivateDeadPlayerServerRpc(NetworkObjectReference playerNetworkObjectReference)
     {
+        alivePlayerCount--;
         DeactivateDeadPlayerClientRpc(playerNetworkObjectReference);
     }
     [ClientRpc]
@@ -162,7 +175,27 @@ public class GameManager : NetworkBehaviour
     {
         playerNetworkObjectReference.TryGet(out NetworkObject playerNetworkObject);
         Player player = playerNetworkObject.GetComponent<Player>();
+
         player.gameObject.SetActive(false);
+        if (player.transform == virtualCamera.Follow)
+        {
+            Player[] playerList = FindObjectsOfType<Player>();
+
+            foreach (Player playerToWatch in playerList)
+            {
+                if (playerToWatch.gameObject.activeSelf)
+                {
+                    virtualCamera.Follow = playerToWatch.transform;
+                    virtualCamera.LookAt = playerToWatch.transform;
+                    playerOnCamera = playerToWatch;
+                    break;
+                }
+            }
+        }
+    }
+    public Player GetPlayerOnCamera()
+    {
+        return playerOnCamera;
     }
     private void RespawnDeadPlayer()
     {
@@ -195,6 +228,10 @@ public class GameManager : NetworkBehaviour
     public bool IsGameOver()
     {
         return state.Value == State.GameOver;
+    }
+    public bool IsGamePlaying()
+    {
+        return state.Value == State.GamePlaying;
     }
     public bool IsCountdownToStart()
     {

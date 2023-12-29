@@ -22,16 +22,24 @@ public class PlayerHealthSystem : NetworkBehaviour
     private void Update()
     {
         hpText.text = currentHealth.Value.ToString() + "/" + maxHealth.Value.ToString();
-        timeSinceLastDamageTaken += Time.deltaTime;
-        if (currentHealth.Value < maxHealth.Value && timeSinceLastDamageTaken > neededTimeToStartHealing)
+        if (IsOwner)
         {
-            healingTimer += Time.deltaTime;
-            if (healingTimer > neededTimeForHealing)
+            timeSinceLastDamageTaken += Time.deltaTime;
+            if (currentHealth.Value < maxHealth.Value && timeSinceLastDamageTaken > neededTimeToStartHealing)
             {
-                AddHealth(healingAmount);
+                healingTimer += Time.deltaTime;
+                if (healingTimer > neededTimeForHealing)
+                {
+                    AddHealth(healingAmount);
+                    healingTimer = 0;
+                }
+            }
+            else
+            {
                 healingTimer = 0;
             }
         }
+     
     }
     public override void OnNetworkSpawn()
     {
@@ -44,7 +52,7 @@ public class PlayerHealthSystem : NetworkBehaviour
     [ClientRpc]
     private void UpdateHealthBarClientRpc()
     {
-        maxHealth.OnValueChanged?.Invoke(0,maxHealth.Value);
+        maxHealth.OnValueChanged?.Invoke(0, maxHealth.Value);
     }
     [ServerRpc(RequireOwnership = false)]
     private void SetHealthOnSpawnServerRpc()
@@ -56,12 +64,17 @@ public class PlayerHealthSystem : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void TakeDamageServerRpc(float damage)
     {
-        timeSinceLastDamageTaken = 0;
+        GetHitClientRpc();
         currentHealth.Value -= damage;
         if (currentHealth.Value <= 0)
         {
             PlayerDiedClientRpc();
         }
+    }
+    [ClientRpc]
+    public void GetHitClientRpc()
+    {
+        timeSinceLastDamageTaken = 0;
     }
     [ClientRpc]
     public void PlayerDiedClientRpc()

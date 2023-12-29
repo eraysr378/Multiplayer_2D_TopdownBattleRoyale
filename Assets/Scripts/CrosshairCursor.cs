@@ -4,10 +4,24 @@ using UnityEngine;
 
 public class CrosshairCursor : MonoBehaviour
 {
-    private void Awake()
+
+    private void Start()
     {
-        Cursor.visible = false;
+        GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
     }
+
+    private void GameManager_OnStateChanged(object sender, System.EventArgs e)
+    {
+        if (GameManager.Instance.IsGamePlaying())
+        {
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.visible = true;
+        }
+    }
+
     private void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

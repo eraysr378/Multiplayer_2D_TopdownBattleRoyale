@@ -39,23 +39,27 @@ public class PlayerAnimator : NetworkBehaviour
 
     private void Player_OnObjectThrow(object sender, System.EventArgs e)
     {
-        animator.SetTrigger(THROW);
+        //animator.SetTrigger(THROW);
+        SetTriggerServerRpc(THROW);
 
     }
 
     private void Player_OnAnyShotgunReload(object sender, System.EventArgs e)
     {
-        animator.SetTrigger(RELOAD_SHOTGUN);
+        //animator.SetTrigger(RELOAD_SHOTGUN);
+        SetTriggerServerRpc(RELOAD_SHOTGUN);
     }
 
     private void Player_OnAnyRifleReload(object sender, System.EventArgs e)
     {
-        animator.SetTrigger(RELOAD_RIFLE);
+        //animator.SetTrigger(RELOAD_RIFLE);
+        SetTriggerServerRpc(RELOAD_RIFLE);
     }
 
     private void Player_OnAnyPistolReload(object sender, System.EventArgs e)
     {
-        animator.SetTrigger(RELOAD_PISTOL);
+        //animator.SetTrigger(RELOAD_PISTOL);
+        SetTriggerServerRpc(RELOAD_PISTOL);
     }
 
 
@@ -64,21 +68,24 @@ public class PlayerAnimator : NetworkBehaviour
 
         if (player.GetCurrentWeapon() is Pistol)
         {
-            animator.SetTrigger(SELECT_PISTOL);
+            //animator.SetTrigger(SELECT_PISTOL);
+            SetTriggerServerRpc(SELECT_PISTOL);
 
         }
         else if (player.GetCurrentWeapon() is Rifle)
         {
-            animator.SetTrigger(SELECT_RIFLE);
-
+            //animator.SetTrigger(SELECT_RIFLE);
+            SetTriggerServerRpc(SELECT_RIFLE);
         }
         else if (player.GetCurrentWeapon() is Shotgun)
         {
-            animator.SetTrigger(SELECT_SHOTGUN);
+            //animator.SetTrigger(SELECT_SHOTGUN);
+            SetTriggerServerRpc(SELECT_SHOTGUN);
         }
         else if (player.GetCurrentWeapon() is Knife)
         {
-            animator.SetTrigger(SELECT_KNIFE);
+            //animator.SetTrigger(SELECT_KNIFE);
+            SetTriggerServerRpc(SELECT_KNIFE);
         }
     }
 
@@ -92,14 +99,27 @@ public class PlayerAnimator : NetworkBehaviour
         animator.SetBool(IS_WALKING, player.IsWalking());
     }
     public void PlayKnifeAttackAnimtion()
+    {    
+        SetTriggerServerRpc(KNIFE_ATTACK); 
+
+        //if (Random.Range(0, 2) == 0)
+        //{
+        //    //animator.SetTrigger(KNIFE_ATTACK);
+        //}
+        //else
+        //{
+        //    //animator.SetTrigger(KNIFE_ATTACK2);
+        //}
+    }
+
+    [ServerRpc(RequireOwnership =false)]
+    private void SetTriggerServerRpc(string trigger)
     {
-        if (Random.Range(0, 2) == 0)
-        {
-            animator.SetTrigger(KNIFE_ATTACK);
-        }
-        else
-        {
-            animator.SetTrigger(KNIFE_ATTACK2);
-        }
+        SetTriggerClientRpc(trigger);
+    }
+    [ClientRpc]
+    private void SetTriggerClientRpc(string trigger)
+    {
+        animator.SetTrigger(trigger);
     }
 }

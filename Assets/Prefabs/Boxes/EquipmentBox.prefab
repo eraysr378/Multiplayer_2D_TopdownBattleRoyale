@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6263690522385906510}
   - component: {fileID: 2004771758381304665}
   m_Layer: 8
-  m_Name: UpgradeBox
+  m_Name: EquipmentBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -5.02, y: -2.93, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -49,7 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 0
   droppedObject: {fileID: 0}
-  upgradeOnGroundSO: {fileID: 11400000, guid: d2ae3bb72dcd3724d92c175d72c23282, type: 2}
+  equipmentOnGroundSO: {fileID: 0}
 --- !u!114 &7025737748608450470
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -38,16 +38,13 @@ public class Bullet : NetworkBehaviour
         RaycastHit2D[] hitArray = Physics2D.CircleCastAll(transform.position, bulletRadius, moveDir, moveDistance);
         foreach (RaycastHit2D hit in hitArray)
         {
-            // If player gets hit, then it destroys the bullet so that sometimes below code does not work
-            if (!hit.collider.GetComponent<Bullet>())
+            // If bullet hits a box, destroy the bullet
+            if (hit.collider.GetComponent<Box>())
             {
                 Debug.Log(hit.collider.name + " hit!");
 
-                Player player = hit.collider.GetComponent<Player>();
-                if (player != null)
-                {
-                    //Debug.Log("This is player hp: " + player.GetCurrentHealth());
-                }
+                Destroy(gameObject);
+
             }
         }
         // if bullet does not hit anywhere then make it keep moving
