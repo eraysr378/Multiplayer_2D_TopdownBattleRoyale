@@ -16,7 +16,8 @@ public class Gun : MonoBehaviour, Weapon
     [SerializeField] protected float magazineMaxCapacity;
     [SerializeField] protected float magazineCurrentCapacity;
     [SerializeField] protected float reloadDuration;
-    [SerializeField] protected bool isReloading;   
+    [SerializeField] protected bool isReloading;
+    [SerializeField] protected Sprite sprite;
 
     protected Bullet bullet;
     protected Laser laser;
@@ -64,5 +65,18 @@ public class Gun : MonoBehaviour, Weapon
     public bool IsLaserActive()
     {
         return isLaserActive;
+    }
+
+    public Sprite GetWeaponSprite()
+    {
+        return sprite; 
+    }
+    public float CurrentMagazineCapacity()
+    {
+        return magazineCurrentCapacity;
+    }
+    public float MaxMagazineCapacity()
+    {
+        return magazineMaxCapacity ;
     }
 }

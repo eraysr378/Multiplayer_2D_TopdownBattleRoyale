@@ -11,6 +11,7 @@ public class Knife : MonoBehaviour, Weapon
     [SerializeField] private float attackRadius;
     [SerializeField] private float attackDamage;
     [SerializeField] private float neededTimeToHit;
+    [SerializeField] private Sprite sprite;
     bool attack = true;
     float timer = 0;
     float hitTimer = 0;
@@ -87,5 +88,10 @@ public class Knife : MonoBehaviour, Weapon
     {
         Gizmos.color = new Color32(0, 200, 0, 100);
         Gizmos.DrawSphere(attackPoint.position, attackRadius);
+    }
+
+    public Sprite GetWeaponSprite()
+    {
+        return sprite;
     }
 }

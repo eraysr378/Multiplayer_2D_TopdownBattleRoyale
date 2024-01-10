@@ -52,6 +52,7 @@ public class Player : NetworkBehaviour
     private Vector3 moveDir;
     private ThrowSystem throwSystem;
     private bool canShoot;
+    private float circleCheckTimer;
 
 
 
@@ -129,6 +130,7 @@ public class Player : NetworkBehaviour
         {
             return;
         }
+        CheckIsInCircle();
         HandleGrenadeThrow();
         HandleMovement();
         HandleShooting();
@@ -143,7 +145,20 @@ public class Player : NetworkBehaviour
         }
 
     }
+    // If the player is not in the safe circle zone, then it will take damage until it gets in the safe zome
+    private void CheckIsInCircle()
+    {
+        circleCheckTimer += Time.deltaTime;
+        if(circleCheckTimer > 1)
+        {
+            if (DamageCircle.IsOutsideCircle_Static(transform.position))
+            {
+                playerHealthSystem.TakeDamageServerRpc(10);
+                circleCheckTimer = 0;
+            }
 
+        }
+    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (IsOwner)
@@ -508,6 +523,11 @@ public class Player : NetworkBehaviour
     {
         return moveSpeed;
     }
+    public AbilitySystem GetAbilitySystem()
+    {
+        return abilitySystem;
+    }
+
 }
 
 

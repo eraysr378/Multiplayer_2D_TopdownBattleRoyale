@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface Weapon
 {
-
+    public Sprite GetWeaponSprite();
     public bool Fire();
     public Vector3 GetFirePoint();
 

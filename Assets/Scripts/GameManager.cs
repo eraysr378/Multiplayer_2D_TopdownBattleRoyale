@@ -82,10 +82,11 @@ public class GameManager : NetworkBehaviour
         {
             return;
         }
-        if (alivePlayerCount <= 1)
-        {
-            state.Value = State.GameOver;
-        }
+        // uncomment this to end the game
+        //if (alivePlayerCount <= 1)
+        //{
+        //    state.Value = State.GameOver;
+        //}
         switch (state.Value)
         {
 
@@ -155,7 +156,7 @@ public class GameManager : NetworkBehaviour
             Player.LocalInstance.OnLocalPlayerDied += Player_OnLocalPlayerDied;
         }
     }
-
+   
     private void Player_OnLocalPlayerDied(object sender, Player.OnLocalPlayerDiedEventArgs e)
     {
         //Debug.Log("Player will be spawned after 2 secs");

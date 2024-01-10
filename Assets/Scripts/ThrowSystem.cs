@@ -30,6 +30,10 @@ public class ThrowSystem : MonoBehaviour
             }
         }
     }
+    public float GetGrenadeCount()
+    {
+        return grenadeAmount;
+    }
     public void IncreaseGrenadeAmount(int increaseAmount)
     {
         grenadeAmount += increaseAmount;

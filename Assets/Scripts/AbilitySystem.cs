@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,9 @@ public enum Ability
 }
 public class AbilitySystem : MonoBehaviour
 {
+    public event EventHandler OnDashUnlocked;
+    public event EventHandler OnPistolLaserUnlocked;
+    public event EventHandler OnRifleLaserUnlocked;
     [SerializeField] private Player player;
     [SerializeField] private float dashCooldown;
     [SerializeField] private float dashDuration;
@@ -90,12 +94,31 @@ public class AbilitySystem : MonoBehaviour
         if (!unlockedAbilities.Contains(ability))
         {
             unlockedAbilities.Add(ability);
+            switch (ability)
+            {
+                case Ability.Dash:
+                    OnDashUnlocked?.Invoke(this, EventArgs.Empty);
+                    break;
+                case Ability.PistolLaser:
+                    OnPistolLaserUnlocked?.Invoke(this, EventArgs.Empty);
+                    break;
+                case Ability.RifleLaser:
+                    OnRifleLaserUnlocked?.Invoke(this, EventArgs.Empty);
+                    break;
+
+                default:
+                    break;
+            }
             return true;
         }
         else
         {
             return false;
         }
+    }
+    public bool IsDashCooldown()
+    {
+        return isDashCooldown;
     }
 
 }
