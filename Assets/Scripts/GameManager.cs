@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using Cinemachine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class GameManager : NetworkBehaviour
 {
@@ -19,12 +20,14 @@ public class GameManager : NetworkBehaviour
     }
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
     [SerializeField] private Transform playerPrefab;
+
     private NetworkVariable<State> state = new NetworkVariable<State>(State.WaitingToStart);
     private bool isLocalPlayerReady;
     private NetworkVariable<float> countdownToStartTimer = new NetworkVariable<float>(3f);
     private Dictionary<ulong, bool> playerReadyDictionary;
     private Player playerOnCamera;
     private int alivePlayerCount;
+    private bool areBoxesSpawned;
     // Start is called before the first frame update
 
     private void Awake()
@@ -74,6 +77,7 @@ public class GameManager : NetworkBehaviour
         {
             Player.OnAnyPlayerSpawned += Player_OnAnyPlayerSpawned;
         }
+
     }
     private void Update()
     {
@@ -83,10 +87,10 @@ public class GameManager : NetworkBehaviour
             return;
         }
         // uncomment this to end the game
-        //if (alivePlayerCount <= 1)
-        //{
-        //    state.Value = State.GameOver;
-        //}
+        if (alivePlayerCount <= 1)
+        {
+            state.Value = State.GameOver;
+        }
         switch (state.Value)
         {
 
@@ -94,6 +98,16 @@ public class GameManager : NetworkBehaviour
                 break;
             case State.CountdownToStart:
                 countdownToStartTimer.Value -= Time.deltaTime;
+                if(countdownToStartTimer.Value < 2 && !areBoxesSpawned)
+                {
+                    areBoxesSpawned = true;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        ShooterGameMultiplayer.Instance.SpawnAbilityBox(new Vector3(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100),0));
+                        ShooterGameMultiplayer.Instance.SpawnEquipmentBox(new Vector3(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100), 0));
+                        ShooterGameMultiplayer.Instance.SpawnWeaponBox(new Vector3(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100), 0));
+                    }
+                }
                 if (countdownToStartTimer.Value < 0)
                 {
                     alivePlayerCount = NetworkManager.Singleton.ConnectedClients.Count;
@@ -109,7 +123,6 @@ public class GameManager : NetworkBehaviour
             default:
                 break;
         }
-        Debug.Log(state.Value.ToString());
     }
     [ServerRpc(RequireOwnership = false)]
     private void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
@@ -132,7 +145,7 @@ public class GameManager : NetworkBehaviour
     }
     private void CheckIfPlayerReady()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && state.Value == State.WaitingToStart)
+        if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(Loader.Scene.GameScene.ToString()) && state.Value == State.WaitingToStart)
         {
             isLocalPlayerReady = true;
             OnLocalPlayerReadyChanged?.Invoke(this, EventArgs.Empty);

@@ -1,8 +1,13 @@
 ﻿
+using System.Drawing;
+using Unity.Netcode;
 using UnityEngine;
-public class DamageCircle : MonoBehaviour {
+using UnityEngine.UIElements;
 
-    private static DamageCircle instance;
+public class DamageCircle : NetworkBehaviour
+{
+
+    public static DamageCircle Instance;
 
     [SerializeField] private Transform targetCircleTransform;
 
@@ -13,7 +18,7 @@ public class DamageCircle : MonoBehaviour {
     [SerializeField] private Transform rightTransform;
 
     private float circleShrinkSpeed;
-    private float shrinkTimer;
+    private NetworkVariable<float> shrinkTimer = new NetworkVariable<float>(1);
 
     private Vector3 circleSize;
     private Vector3 circlePosition;
@@ -21,51 +26,72 @@ public class DamageCircle : MonoBehaviour {
     private Vector3 targetCircleSize;
     private Vector3 targetCirclePosition;
 
-    private void Awake() {
-        instance = this;
+    private void Awake()
+    {
+       
+    }
+    public override void OnNetworkSpawn()
+    {
+        Instance = this;
 
-        circleShrinkSpeed = 20f;
+        circleShrinkSpeed = 10f;
 
-        SetCircleSize(new Vector3(0, 0), new Vector3(200, 200));
+        SetCircleSizeServerRpc(new Vector3(0, 0), new Vector3(300, 300));
 
-        SetTargetCircle(new Vector3(0, 0), new Vector3(160, 160), 5f);
+        SetTargetCircleServerRpc(new Vector3(0, 0), new Vector3(250, 250),33f);
     }
 
-    private void Update() {
-        shrinkTimer -= Time.deltaTime;
+    private void Update()
+    {
+        if (!IsServer)
+        {
+            return;
+        }
 
-        if (shrinkTimer < 0) {
+        shrinkTimer.Value -= Time.deltaTime;
+
+        if (shrinkTimer.Value < 0)
+        {
             Vector3 sizeChangeVector = (targetCircleSize - circleSize).normalized;
             Vector3 newCircleSize = circleSize + sizeChangeVector * Time.deltaTime * circleShrinkSpeed;
 
             Vector3 circleMoveDir = (targetCirclePosition - circlePosition).normalized;
             Vector3 newCirclePosition = circlePosition + circleMoveDir * Time.deltaTime * circleShrinkSpeed;
 
-            SetCircleSize(newCirclePosition, newCircleSize);
+            SetCircleSizeServerRpc(newCirclePosition, newCircleSize);
 
             float distanceTestAmount = .1f;
-            if (Vector3.Distance(newCircleSize, targetCircleSize) < distanceTestAmount && Vector3.Distance(newCirclePosition, targetCirclePosition) < distanceTestAmount) {
+            if (Vector3.Distance(newCircleSize, targetCircleSize) < distanceTestAmount && Vector3.Distance(newCirclePosition, targetCirclePosition) < distanceTestAmount)
+            {
                 GenerateTargetCircle();
             }
         }
     }
 
-    private void GenerateTargetCircle() {
-        float shrinkSizeAmount = Random.Range(3f, 12f);
+    private void GenerateTargetCircle()
+    {
+        float shrinkSizeAmount = Random.Range(30f,50f);
         Vector3 generatedTargetCircleSize = circleSize - new Vector3(shrinkSizeAmount, shrinkSizeAmount) * 2f;
 
         // Set a minimum size
-        if (generatedTargetCircleSize.x < 20f) generatedTargetCircleSize = Vector3.one * 20f;
+        if (generatedTargetCircleSize.x < 10f) generatedTargetCircleSize = Vector3.one * 10f;
 
-        Vector3 generatedTargetCirclePosition = circlePosition + 
+        Vector3 generatedTargetCirclePosition = circlePosition +
             new Vector3(Random.Range(-shrinkSizeAmount, shrinkSizeAmount), Random.Range(-shrinkSizeAmount, shrinkSizeAmount));
 
-        float shrinkTime = Random.Range(1f, 6f);
+        float shrinkTime = 30f;
 
-        SetTargetCircle(generatedTargetCirclePosition, generatedTargetCircleSize, shrinkTime);
+        SetTargetCircleServerRpc(generatedTargetCirclePosition, generatedTargetCircleSize, shrinkTime);
     }
 
-    private void SetCircleSize(Vector3 position, Vector3 size) {
+    [ServerRpc(RequireOwnership =false)]
+    private void SetCircleSizeServerRpc(Vector3 position, Vector3 size)
+    {
+        SetCircleSizeClientRpc(position,size);
+    }
+    [ClientRpc]
+    private void SetCircleSizeClientRpc(Vector3 position, Vector3 size)
+    {
         circlePosition = position;
         circleSize = size;
 
@@ -73,34 +99,41 @@ public class DamageCircle : MonoBehaviour {
 
         circleTransform.localScale = size;
 
-        topTransform.localScale = new Vector3(1000, 1000);
+        topTransform.localScale = new Vector3(2000, 2000);
         topTransform.localPosition = new Vector3(0, topTransform.localScale.y * .5f + size.y * .5f);
-        
-        bottomTransform.localScale = new Vector3(1000, 1000);
+
+        bottomTransform.localScale = new Vector3(2000, 2000);
         bottomTransform.localPosition = new Vector3(0, -topTransform.localScale.y * .5f - size.y * .5f);
 
-        leftTransform.localScale = new Vector3(1000, size.y);
+        leftTransform.localScale = new Vector3(2000, size.y);
         leftTransform.localPosition = new Vector3(-leftTransform.localScale.x * .5f - size.x * .5f, 0f);
 
-        rightTransform.localScale = new Vector3(1000, size.y);
+        rightTransform.localScale = new Vector3(2000, size.y);
         rightTransform.localPosition = new Vector3(+leftTransform.localScale.x * .5f + size.x * .5f, 0f);
     }
-
-    private void SetTargetCircle(Vector3 position, Vector3 size, float shrinkTimer) {
-        this.shrinkTimer = shrinkTimer;
+    [ServerRpc(RequireOwnership =false)]
+    private void SetTargetCircleServerRpc(Vector3 position, Vector3 size, float shrinkTimer)
+    {
+        this.shrinkTimer.Value = shrinkTimer;
 
         targetCircleTransform.position = position;
         targetCircleTransform.localScale = size;
-        
+
         targetCirclePosition = position;
         targetCircleSize = size;
     }
 
-    private bool IsOutsideCircle(Vector3 position) {
+    private bool IsOutsideCircle(Vector3 position)
+    {
         return Vector3.Distance(position, circlePosition) > circleSize.x * .5f;
     }
 
-    public static bool IsOutsideCircle_Static(Vector3 position) {
-        return instance.IsOutsideCircle(position);
+    public static bool IsOutsideCircle_Static(Vector3 position)
+    {
+        return Instance.IsOutsideCircle(position);
+    }
+    public float GetShrinkTimer()
+    {
+        return shrinkTimer.Value;
     }
 }

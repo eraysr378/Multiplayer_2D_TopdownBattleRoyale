@@ -1911,6 +1911,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefabsSO: {fileID: 11400000, guid: e00af6a74b5c6d946bdd01bfb47785a2, type: 2}
   throwableObjectsSO: {fileID: 11400000, guid: 76c705a01278ab44b8d5b7141e86de2f, type: 2}
+  equipmentBoxPrefab: {fileID: 9122980342072488132, guid: 5603c14ae2045dc4e849617b97cce18f, type: 3}
+  weaponBoxPrefab: {fileID: 2773025838142236995, guid: 6e2ae9f8ee83fa14cba2ab15e6bd45d8, type: 3}
+  abilityBoxPrefab: {fileID: 631781344904836769, guid: 11d2671648fd91f4197d8a5d02729554, type: 3}
 --- !u!4 &456275586
 Transform:
   m_ObjectHideFlags: 0
@@ -2396,6 +2399,21 @@ MonoBehaviour:
       OverridingTargetPrefab: {fileID: 0}
     - Override: 0
       Prefab: {fileID: 3017088868767209632, guid: 7140c10a5cccb4e41984165fb58bd3ac, type: 3}
+      SourcePrefabToOverride: {fileID: 0}
+      SourceHashToOverride: 0
+      OverridingTargetPrefab: {fileID: 0}
+    - Override: 0
+      Prefab: {fileID: 8861525540946017730, guid: 11d2671648fd91f4197d8a5d02729554, type: 3}
+      SourcePrefabToOverride: {fileID: 0}
+      SourceHashToOverride: 0
+      OverridingTargetPrefab: {fileID: 0}
+    - Override: 0
+      Prefab: {fileID: 738404417973863586, guid: 5603c14ae2045dc4e849617b97cce18f, type: 3}
+      SourcePrefabToOverride: {fileID: 0}
+      SourceHashToOverride: 0
+      OverridingTargetPrefab: {fileID: 0}
+    - Override: 0
+      Prefab: {fileID: 4462857310732073795, guid: 6e2ae9f8ee83fa14cba2ab15e6bd45d8, type: 3}
       SourcePrefabToOverride: {fileID: 0}
       SourceHashToOverride: 0
       OverridingTargetPrefab: {fileID: 0}

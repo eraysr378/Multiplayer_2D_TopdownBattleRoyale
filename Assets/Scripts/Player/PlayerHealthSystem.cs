@@ -9,12 +9,12 @@ public class PlayerHealthSystem : NetworkBehaviour
 {
     public event EventHandler OnPlayerDied;
     [SerializeField] private float maxHealthVal;
-    private NetworkVariable<float> maxHealth = new NetworkVariable<float>();
     [SerializeField] private TextMeshProUGUI hpText;
     [SerializeField] private float neededTimeToStartHealing;
     [SerializeField] private float healingAmount;
     [SerializeField] private float neededTimeForHealing;
     private NetworkVariable<float> currentHealth = new NetworkVariable<float>();
+    private NetworkVariable<float> maxHealth = new NetworkVariable<float>();
 
     private float timeSinceLastDamageTaken;
     private float healingTimer;
@@ -28,6 +28,7 @@ public class PlayerHealthSystem : NetworkBehaviour
             if (currentHealth.Value < maxHealth.Value && timeSinceLastDamageTaken > neededTimeToStartHealing)
             {
                 healingTimer += Time.deltaTime;
+                // if player does not take any damage for some time, then the player starts healing automatically
                 if (healingTimer > neededTimeForHealing)
                 {
                     AddHealth(healingAmount);

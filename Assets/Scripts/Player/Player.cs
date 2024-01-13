@@ -17,6 +17,9 @@ public class Player : NetworkBehaviour
     public event EventHandler OnShotgunReload;
     public event EventHandler OnPistolReload;
     public event EventHandler OnObjectThrow;
+    [SerializeField] private GameObject enemyMinimapIcon;
+    [SerializeField] private GameObject playerMinimapIcon;
+
 
     public static void ResetStaticData()
     {
@@ -62,8 +65,12 @@ public class Player : NetworkBehaviour
         if (IsOwner)
         {
             LocalInstance = this;
+            playerMinimapIcon.SetActive(true);
         }
-        OnAnyPlayerSpawned?.Invoke(this, EventArgs.Empty);
+        else
+        {
+            enemyMinimapIcon.SetActive(true);
+        }
         rb = GetComponent<Rigidbody2D>();
         throwSystem = GetComponentInChildren<ThrowSystem>();
         audioSource = GetComponent<AudioSource>();
@@ -77,6 +84,8 @@ public class Player : NetworkBehaviour
 
         transform.position = spawnPositionsList[ShooterGameMultiplayer.Instance.GetPlayerDataIndexFromClientId(OwnerClientId)]; // this will change when lobby is added
         canShoot = true;
+
+        OnAnyPlayerSpawned?.Invoke(this, EventArgs.Empty);
         if (IsServer)
         {
             NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
@@ -181,7 +190,7 @@ public class Player : NetworkBehaviour
 
 
     }
-
+    // Take the object from the ground the player does not have the object ( weapon,ability or equipment)
     private void TakeObjectOnGround(ObjectOnGround objectOnGround)
     {
         if (objectOnGround.GetComponent<EquipmentOnGround>() != null)
@@ -212,6 +221,7 @@ public class Player : NetworkBehaviour
            
         }
     }
+    // when key G is pressed, throw a grenade if the player has a grenade
     private void HandleGrenadeThrow()
     {
         if (Input.GetKeyDown(KeyCode.G))
@@ -222,6 +232,7 @@ public class Player : NetworkBehaviour
             }
         }
     }
+    // when key M is pressed use dash ability if it is usable
     private void HandleDash()
     {
         if (Input.GetKeyDown(KeyCode.M))
@@ -232,6 +243,7 @@ public class Player : NetworkBehaviour
             }
         }
     }
+    // activate and deactivate laser if player has it.
     private void HandleLaserActivation()
     {
         if (Input.GetKeyDown(KeyCode.V))
@@ -338,12 +350,8 @@ public class Player : NetworkBehaviour
         isWalking = moveDir != Vector3.zero;
 
         float moveDistance = moveSpeed * Time.deltaTime;
-        //float playerRadius = 1f;
-        //bool canMove = !Physics2D.CircleCast(transform.position, playerRadius, moveDir, moveDistance);
-        //if (canMove)
-        //{
+
         transform.position += moveDir * moveDistance;
-        //}
 
 
         transform.eulerAngles = GetAimAngle();
@@ -473,7 +481,6 @@ public class Player : NetworkBehaviour
     {
         OnAnyShotgunReload?.Invoke(this, EventArgs.Empty);
     }
-    // Shotgun reload mechanism is different than others, therefore this function is needed
     public void ReloadShotgun()
     {
         OnShotgunReload?.Invoke(this, EventArgs.Empty);

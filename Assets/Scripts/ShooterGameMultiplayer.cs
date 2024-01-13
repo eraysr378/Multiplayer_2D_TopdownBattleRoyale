@@ -16,6 +16,9 @@ public class ShooterGameMultiplayer : NetworkBehaviour
     public event EventHandler OnPlayerDataNetworkListChanged;
     [SerializeField] private BulletPrefabsSO bulletPrefabsSO;
     [SerializeField] private ThrowableObjectsSO throwableObjectsSO;
+    [SerializeField] private Transform equipmentBoxPrefab;
+    [SerializeField] private Transform weaponBoxPrefab;
+    [SerializeField] private Transform abilityBoxPrefab;
     private NetworkList<PlayerData> playerDataNetworkList;
     private string playerName;
     private void Awake()
@@ -42,6 +45,39 @@ public class ShooterGameMultiplayer : NetworkBehaviour
     {
         OnPlayerDataNetworkListChanged?.Invoke(this, EventArgs.Empty);
     }
+    public void SpawnAbilityBox(Vector3 position)
+    {
+        SpawnAbilityBoxServerRpc(position);
+    }
+    [ServerRpc(RequireOwnership =false)]
+    public void SpawnAbilityBoxServerRpc(Vector3 position)
+    {
+        NetworkObject networkObject = Instantiate(abilityBoxPrefab, position, Quaternion.identity).GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
+    }
+    public void SpawnWeaponBox(Vector3 position)
+    {
+        SpawnWeaponBoxServerRpc(position);
+    }
+    [ServerRpc(RequireOwnership = false)]
+    public void SpawnWeaponBoxServerRpc(Vector3 position)
+    {
+        NetworkObject networkObject = Instantiate(weaponBoxPrefab, position, Quaternion.identity).GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
+
+    }
+    public void SpawnEquipmentBox(Vector3 position)
+    {
+        SpawnEquipmentBoxServerRpc(position);
+    }
+    [ServerRpc(RequireOwnership = false)]
+    public void SpawnEquipmentBoxServerRpc(Vector3 position)
+    {
+        NetworkObject networkObject = Instantiate(equipmentBoxPrefab, position, Quaternion.identity).GetComponent<NetworkObject>();
+
+        networkObject.Spawn(true);
+    }
+
 
     public void SpawnGrenade(Player ownerPlayer, Vector3 position, Vector3 moveDir)
     {

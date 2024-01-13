@@ -31,6 +31,10 @@ public class PlayerUI : MonoBehaviour
     }
     private void Update()
     {
+        if(player == null)
+        {
+            return;
+        }
         Gun gun = player.GetCurrentWeapon() as Gun;
         if (gun != null)
         {
