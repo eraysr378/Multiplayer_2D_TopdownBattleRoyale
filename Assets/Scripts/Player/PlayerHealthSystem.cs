@@ -69,6 +69,7 @@ public class PlayerHealthSystem : NetworkBehaviour
         currentHealth.Value -= damage;
         if (currentHealth.Value <= 0)
         {
+            currentHealth.Value = 10000; // just to make sure the PlayerDiedClientRpc is called once
             PlayerDiedClientRpc();
         }
     }

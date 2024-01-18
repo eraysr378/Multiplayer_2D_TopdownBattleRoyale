@@ -4,6 +4,7 @@ using UnityEngine;
 using Cinemachine;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : NetworkBehaviour
 {
@@ -20,6 +21,7 @@ public class GameManager : NetworkBehaviour
     }
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
     [SerializeField] private Transform playerPrefab;
+    [SerializeField] private TextMeshProUGUI alivePlayerCountText;
 
     private NetworkVariable<State> state = new NetworkVariable<State>(State.WaitingToStart);
     private bool isLocalPlayerReady;
@@ -98,19 +100,19 @@ public class GameManager : NetworkBehaviour
                 break;
             case State.CountdownToStart:
                 countdownToStartTimer.Value -= Time.deltaTime;
-                if(countdownToStartTimer.Value < 2 && !areBoxesSpawned)
+                if (countdownToStartTimer.Value < 2 && !areBoxesSpawned)
                 {
                     areBoxesSpawned = true;
                     for (int i = 0; i < 10; i++)
                     {
-                        ShooterGameMultiplayer.Instance.SpawnAbilityBox(new Vector3(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100),0));
+                        ShooterGameMultiplayer.Instance.SpawnAbilityBox(new Vector3(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100), 0));
                         ShooterGameMultiplayer.Instance.SpawnEquipmentBox(new Vector3(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100), 0));
                         ShooterGameMultiplayer.Instance.SpawnWeaponBox(new Vector3(UnityEngine.Random.Range(-100, 100), UnityEngine.Random.Range(-100, 100), 0));
                     }
                 }
                 if (countdownToStartTimer.Value < 0)
                 {
-                    alivePlayerCount = NetworkManager.Singleton.ConnectedClients.Count;
+                    UpdateAlivePlayerCountClientRpc(NetworkManager.Singleton.ConnectedClientsIds.Count);
                     state.Value = State.GamePlaying;
                 }
                 break;
@@ -169,19 +171,26 @@ public class GameManager : NetworkBehaviour
             Player.LocalInstance.OnLocalPlayerDied += Player_OnLocalPlayerDied;
         }
     }
-   
+
     private void Player_OnLocalPlayerDied(object sender, Player.OnLocalPlayerDiedEventArgs e)
     {
-        //Debug.Log("Player will be spawned after 2 secs");
+        Debug.Log("Player died "+ NetworkManager.LocalClientId.ToString());
         DeactivateDeadPlayerServerRpc(e.player.GetNetworkObject());
         //Invoke("RespawnDeadPlayer", 2f);
 
 
     }
+    [ClientRpc]
+    private void UpdateAlivePlayerCountClientRpc(int newAlivePlayerCount)
+    {
+        alivePlayerCount = newAlivePlayerCount;
+        alivePlayerCountText.text = "ALIVE: " + alivePlayerCount.ToString("0");
+
+    }
     [ServerRpc(RequireOwnership = false)]
     private void DeactivateDeadPlayerServerRpc(NetworkObjectReference playerNetworkObjectReference)
     {
-        alivePlayerCount--;
+        UpdateAlivePlayerCountClientRpc(alivePlayerCount - 1);
         DeactivateDeadPlayerClientRpc(playerNetworkObjectReference);
     }
     [ClientRpc]

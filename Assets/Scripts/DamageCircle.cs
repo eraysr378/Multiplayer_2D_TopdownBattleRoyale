@@ -38,7 +38,7 @@ public class DamageCircle : NetworkBehaviour
 
         SetCircleSizeServerRpc(new Vector3(0, 0), new Vector3(300, 300));
 
-        SetTargetCircleServerRpc(new Vector3(0, 0), new Vector3(250, 250),33f);
+        SetTargetCircleServerRpc(new Vector3(0, 0), new Vector3(250, 250),60f);
     }
 
     private void Update()
@@ -79,7 +79,7 @@ public class DamageCircle : NetworkBehaviour
         Vector3 generatedTargetCirclePosition = circlePosition +
             new Vector3(Random.Range(-shrinkSizeAmount, shrinkSizeAmount), Random.Range(-shrinkSizeAmount, shrinkSizeAmount));
 
-        float shrinkTime = 30f;
+        float shrinkTime = 60f;
 
         SetTargetCircleServerRpc(generatedTargetCirclePosition, generatedTargetCircleSize, shrinkTime);
     }

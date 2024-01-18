@@ -79,6 +79,7 @@ public class Bullet : NetworkBehaviour
     {
         return NetworkObject;
     }
+    //  for debugging
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

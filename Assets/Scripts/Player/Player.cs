@@ -59,7 +59,7 @@ public class Player : NetworkBehaviour
 
 
 
-
+    // initialize when player connected
     public override void OnNetworkSpawn()
     {
         if (IsOwner)
@@ -101,7 +101,7 @@ public class Player : NetworkBehaviour
             // if anything needs to be destroyed do here
         }
     }
-
+    // when weapon changed set player speed accordingly
     private void WeaponController_OnWeaponChanged(object sender, EventArgs e)
     {
         Weapon weapon = weaponController.GetCurrentWeapon();
@@ -146,6 +146,7 @@ public class Player : NetworkBehaviour
         HandleReload();
         HandleDash();
         HandleLaserActivation();
+        // Debug
         if (Input.GetKeyDown(KeyCode.B))
         {
             playerHealthSystem.TakeDamageServerRpc(10);
@@ -172,6 +173,7 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
+            // check if player is trying to take an object from ground like weapon
             if (collision.GetComponent<ObjectOnGround>() != null)
             {
                 TakeObjectOnGround(collision.GetComponent<ObjectOnGround>());
@@ -182,6 +184,7 @@ public class Player : NetworkBehaviour
 
         if (!IsServer)
             return;
+        // check if palyer gets hit, this runs only on server
         if (collision.GetComponent<Bullet>() && collision.GetComponent<Bullet>().GetOwner() != this)
         {
             playerHealthSystem.TakeDamageServerRpc(10);
@@ -283,6 +286,7 @@ public class Player : NetworkBehaviour
         }
 
     }
+    // relod the weapon
     private void HandleReload()
     {
         if (Input.GetKeyDown(KeyCode.R) && weaponController.GetCurrentWeapon() is Gun)
@@ -290,6 +294,7 @@ public class Player : NetworkBehaviour
             ((Gun)weaponController.GetCurrentWeapon()).StartReloading();
         }
     }
+    // shoot when left mouse button is clicked
     private void HandleShooting()
     {
         if (GetCurrentWeapon() is Pistol)
@@ -360,6 +365,7 @@ public class Player : NetworkBehaviour
     {
         return isWalking;
     }
+    // returns the aim direction of player
     public Vector3 GetAimDirectionNormalized()
     {
         // make player look at mouse position
@@ -369,6 +375,7 @@ public class Player : NetworkBehaviour
         return dir.normalized;
 
     }
+    // returns the aim angle of the player
     public Vector3 GetAimAngle()
     {
         Vector3 dirToCrosshair = GetAimDirectionNormalized();
@@ -533,6 +540,11 @@ public class Player : NetworkBehaviour
     public AbilitySystem GetAbilitySystem()
     {
         return abilitySystem;
+    }
+    public float GetMovingAngle()
+    {
+        float angle = Mathf.Atan2(moveDir.y, moveDir.x);
+        return angle * Mathf.Rad2Deg;
     }
 
 }

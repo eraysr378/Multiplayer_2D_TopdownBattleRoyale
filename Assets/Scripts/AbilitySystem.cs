@@ -1,8 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 public enum Ability
 {
     Dash,
@@ -10,7 +9,7 @@ public enum Ability
     RifleLaser,
     None
 }
-public class AbilitySystem : MonoBehaviour
+public class AbilitySystem : NetworkBehaviour
 {
     public event EventHandler OnDashUnlocked;
     public event EventHandler OnPistolLaserUnlocked;
@@ -18,6 +17,7 @@ public class AbilitySystem : MonoBehaviour
     [SerializeField] private Player player;
     [SerializeField] private float dashCooldown;
     [SerializeField] private float dashDuration;
+    [SerializeField] private GameObject dashEffect;
     private List<Ability> unlockedAbilities = new List<Ability>();
     private float dashSpeed;
     bool isDashCooldown;
@@ -53,16 +53,28 @@ public class AbilitySystem : MonoBehaviour
     }
     public void AbilityDash()
     {
-        if (!isDashCooldown && !isDashStarted)
+        if (!isDashCooldown && !isDashStarted && player.IsWalking())
         {
             isDashCooldown = true;
             dashCooldownTimer = 0;
             timer = 0;
             DashStart();
+            ActivateDashEffectServerRpc(player.GetMovingAngle());
+
 
         }
     }
-
+    [ServerRpc(RequireOwnership =false)]
+    private void ActivateDashEffectServerRpc(float angle)
+    {
+        ActivateDashEffectClientRpc(angle);
+    }
+    [ClientRpc]
+    private void ActivateDashEffectClientRpc(float angle)
+    {
+        dashEffect.transform.eulerAngles = new Vector3(angle, -90, 90);
+        dashEffect.SetActive(true);
+    }
     private void DashStart()
     {
         isDashStarted = true;

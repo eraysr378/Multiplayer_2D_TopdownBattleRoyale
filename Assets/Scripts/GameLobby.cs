@@ -79,7 +79,7 @@ public class GameLobby : MonoBehaviour
             heartBeatTimer -= Time.deltaTime;
             if (heartBeatTimer <= 0)
             {
-                float heartBeatTimerMax = 5f;
+                float heartBeatTimerMax = 29f;
                 heartBeatTimer = heartBeatTimerMax;
 
                 await LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);
